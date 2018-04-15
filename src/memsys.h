@@ -10,22 +10,20 @@
 
 typedef struct Memsys   Memsys;
 
-struct Memsys {
-  Cache *dcache;  // For Part A
-  Cache *icache;  // For Part A,B
-  Cache *l2cache; // For Part A,B
-  DRAM  *dram;    // For Part A,B
-
-   // stats 
-  uns64 stat_ifetch_access;
-  uns64 stat_load_access;
-  uns64 stat_store_access;
-  uns64 stat_ifetch_delay;
-  uns64 stat_load_delay;
-  uns64 stat_store_delay;
+struct Memsys
+{
+	Cache *dcache;  // For Part A
+	Cache *icache;  // For Part A,B
+	Cache *l2cache; // For Part A,B
+	DRAM  *dram;    // For Part A,B
+	// stats 
+	uns64 stat_ifetch_access;
+	uns64 stat_load_access;
+	uns64 stat_store_access;
+	uns64 stat_ifetch_delay;
+	uns64 stat_load_delay;
+	uns64 stat_store_delay;
 };
-
-
 
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
