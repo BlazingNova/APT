@@ -60,23 +60,27 @@ void    dram_print_stats(DRAM *dram){
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 
-uns64   dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write){
-  uns64 delay=DRAM_LATENCY_FIXED;
+uns64   dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write)
+{
+	uns64 delay=DRAM_LATENCY_FIXED;
 
-  if(SIM_MODE!=SIM_MODE_B){
-    delay = dram_access_sim_rowbuf(dram, lineaddr, is_dram_write);
-  }
-
-  // Update stats
-  if(is_dram_write){
-    dram->stat_write_access++;
-    dram->stat_write_delay+=delay;
-  }else{
-    dram->stat_read_access++;
-    dram->stat_read_delay+=delay;
-  }
+	if(SIM_MODE!=SIM_MODE_B)
+	{
+		delay = dram_access_sim_rowbuf(dram, lineaddr, is_dram_write);
+	}
+	// Update stats
+	if(is_dram_write)
+	{
+		dram->stat_write_access++;
+		dram->stat_write_delay+=delay;
+	}
+	else
+	{
+		dram->stat_read_access++;
+		dram->stat_read_delay+=delay;
+	}
   
-  return delay;
+	return delay;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -84,16 +88,43 @@ uns64   dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write){
 // Modify the function below only if you are attempting Part C 
 ///////////////////////////////////////////////////////////////////
 
-uns64   dram_access_sim_rowbuf(DRAM *dram,Addr lineaddr, Flag is_dram_write){
-  uns64 delay=0;
-
-    // Assume a mapping with consecutive lines in the same row
-    // Assume a mapping with consecutive rowbufs in consecutive rows
-    // You need to write this fuction to track open rows 
-    // You will need to compute delay based on row hit/miss/empty
-
-  
-  return delay;
+uns64   dram_access_sim_rowbuf(DRAM *dram,Addr lineaddr, Flag is_dram_write)
+{
+	uns64 delay=0;
+	
+	//BANK AND ROW CALCULATION STARTS HERE
+	uns64 bankid=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))%DRAM_BANKS);						//Find the Bank ID
+	uns64 rowinbank=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))/DRAM_BANKS);						//Find the Row ID
+	//BANK AND ROW CALCULATION ENDS HERE
+	//
+	//DELAYU CALCULATION STARTS HERE
+	if(!is_dram_write)												//If READ to DRAM
+	{
+		if((dram->perbank_row_buf[bankid].valid)&&(dram->perbank_row_buf[bankid].rowid==rowinbank))		//If ROW BUFFER HIT
+		{
+			dram->perbank_row_buf[bankid].valid=TRUE;							//Bank is valid
+			delay+=DRAM_T_BUS+DRAM_T_CAS;									//Only BUS+CAS Latency
+		}
+		else if((dram->perbank_row_buf[bankid].valid)&&(dram->perbank_row_buf[bankid].rowid!=rowinbank))	//Else if ROW BUFFER CONFLICT
+		{
+			delay+=DRAM_T_BUS+DRAM_T_CAS+DRAM_T_ACT+DRAM_T_PRE;						//All 4 latencies
+			dram->perbank_row_buf[bankid].rowid=rowinbank;							//Set rowid
+		}
+		else
+		{
+			delay+=DRAM_T_BUS+DRAM_T_CAS+DRAM_T_ACT;							//Need BUS+CAS+ACT
+			dram->perbank_row_buf[bankid].valid=TRUE;							//Set bank valid
+			dram->perbank_row_buf[bankid].rowid=rowinbank;							//Set Row ID
+		}
+	}
+	else														//IF WRITE TO DRAM
+	{
+		delay+=DRAM_T_BUS+DRAM_T_CAS+DRAM_T_ACT+DRAM_T_PRE;
+		dram->perbank_row_buf[bankid].rowid=rowinbank;
+	}
+	//DELAY CALCULATION ENDS HERE
+	
+	return delay;
 }
 
 

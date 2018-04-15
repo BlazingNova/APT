@@ -1,9 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <time.h>
 
 #include "cache.h"
-
 
 extern uns64 cycle; // You can use this as timestamp for LRU
 int trigger=0;
@@ -119,7 +120,7 @@ void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 	{
 		if(c->sets[set_index].line[ii].valid==FALSE)			//If there is an empty way
 		{
-			victim==ii;						//Set victim to the current way
+			victim=ii;						//Set victim to the current way
 			ii=c->num_ways;						//Break out of loop
 		}
 	}
