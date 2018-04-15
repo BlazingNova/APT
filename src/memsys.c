@@ -6,7 +6,6 @@
 
 #include "memsys.h"
 
-
 //---- Cache Latencies  ------
 
 #define DCACHE_HIT_LATENCY   1
@@ -135,58 +134,88 @@ void memsys_print_stats(Memsys *sys)
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-uns64 memsys_access_modeA(Memsys *sys, Addr lineaddr, Access_Type type, uns core_id){
-  Flag needs_dcache_access=FALSE;
-  Flag is_write=FALSE;
+uns64 memsys_access_modeA(Memsys *sys, Addr lineaddr, Access_Type type, uns core_id)
+{
+	Flag needs_dcache_access=FALSE;
+	Flag is_write=FALSE;
   
-  if(type == ACCESS_TYPE_IFETCH){
-    // no icache in this mode
-  }
-    
-  if(type == ACCESS_TYPE_LOAD){
-    needs_dcache_access=TRUE;
-    is_write=FALSE;
-  }
-  
-  if(type == ACCESS_TYPE_STORE){
-    needs_dcache_access=TRUE;
-    is_write=TRUE;
-  }
-
-  if(needs_dcache_access){
-    Flag outcome=cache_access(sys->dcache, lineaddr, is_write,core_id);
-    if(outcome==MISS){
-      cache_install(sys->dcache, lineaddr, is_write,core_id);
-    }
-  }
-
-  // timing is not simulated in Part A
-  return 0;
+	if(type == ACCESS_TYPE_IFETCH)
+	{
+	    // no icache in this mode
+	}
+	if(type == ACCESS_TYPE_LOAD)
+	{
+		needs_dcache_access=TRUE;
+		is_write=FALSE;
+	}
+	if(type == ACCESS_TYPE_STORE)
+	{
+		needs_dcache_access=TRUE;
+		is_write=TRUE;
+	}
+	if(needs_dcache_access)
+	{
+		Flag outcome=cache_access(sys->dcache, lineaddr, is_write,core_id);
+		if(outcome==MISS)
+		{
+			cache_install(sys->dcache, lineaddr, is_write,core_id);
+		}
+	}
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////
 // --------------- DO NOT CHANGE THE CODE ABOVE THIS LINE ----------
 ////////////////////////////////////////////////////////////////////
 
-uns64 memsys_access_modeBC(Memsys *sys, Addr lineaddr, Access_Type type,uns core_id){
-  uns64 delay=0;
-
- 
-  if(type == ACCESS_TYPE_IFETCH){
-    // YOU NEED TO WRITE THIS PART AND UPDATE DELAY
-  }
-    
-
-  if(type == ACCESS_TYPE_LOAD){
-    // YOU NEED TO WRITE THIS PART AND UPDATE DELAY
-  }
+uns64 memsys_access_modeBC(Memsys *sys, Addr lineaddr, Access_Type type,uns core_id)
+{
+	uns64 delay=0,a=0;
+	Flag needs_dcache_access=FALSE;
+	Flag is_write=FALSE;
   
+	if(type == ACCESS_TYPE_IFETCH)
+	{
+		needs_dcache_access=FALSE;
+		is_write=FALSE;
+	}
+	if(type == ACCESS_TYPE_LOAD)
+	{
+		needs_dcache_access=TRUE;
+		is_write=FALSE;
+	}
+	if(type == ACCESS_TYPE_STORE)
+	{
+		needs_dcache_access=TRUE;
+		is_write=TRUE;
+	}
+	if(!needs_dcache_access)														//If L1 ICACHE
+	{
+		Flag outcome=cache_access(sys->icache,lineaddr,is_write,core_id);								
+		delay+=ICACHE_HIT_LATENCY;													//Get the delay for Icache access
+		if(outcome==MISS)														//if MISS
+		{
+			cache_install(sys->icache,lineaddr,is_write,core_id);									//Install in icache
+			delay+=memsys_L2_access(sys,lineaddr,0,core_id);									//Go to L2 for line
+		}
+	}
+	else																	//If L1 DCACHE
+	{
+		Flag outcome=cache_access(sys->dcache, lineaddr, is_write,core_id);
+		delay+=DCACHE_HIT_LATENCY;													//Get the delay for Dcache access
+		if(outcome==MISS)														//If MISS
+		{
+			cache_install(sys->dcache, lineaddr, is_write,core_id);									//Install in Dcache
+			delay+=memsys_L2_access(sys,lineaddr,FALSE,core_id);									//Add the delay for L2
+			if((sys->dcache->last_evicted_line.valid==TRUE)&&(sys->dcache->last_evicted_line.dirty==TRUE))				//If line is VALID and DIRTY
+			{
+				a+=memsys_L2_access(sys,sys->dcache->last_evicted_line.tag,TRUE,sys->dcache->last_evicted_line.core_id);	//Do the L2 access function -> insert and check DRAM
+				sys->dcache->last_evicted_line.valid=FALSE;									//Invalidate the evicted line
+			}
+		}
+	}
 
-  if(type == ACCESS_TYPE_STORE){
-    // YOU NEED TO WRITE THIS PART AND UPDATE DELAY
-  }
- 
-  return delay;
+	return delay;
 }
 
 
@@ -195,12 +224,20 @@ uns64 memsys_access_modeBC(Memsys *sys, Addr lineaddr, Access_Type type,uns core
 // ----- YOU NEED TO WRITE THIS FUNCTION AND UPDATE DELAY ----------
 /////////////////////////////////////////////////////////////////////
 
-uns64   memsys_L2_access(Memsys *sys, Addr lineaddr, Flag is_writeback, uns core_id){
-  uns64 delay = L2CACHE_HIT_LATENCY;
+uns64   memsys_L2_access(Memsys *sys, Addr lineaddr, Flag is_writeback, uns core_id)
+{
+	uns64 delay = L2CACHE_HIT_LATENCY,a=0;
+	Flag outcome=cache_access(sys->l2cache,lineaddr,is_writeback,core_id);									//Access the L2 cache
+	if(outcome==MISS)															//If Cache miss
+	{
+		cache_install(sys->l2cache,lineaddr,is_writeback,core_id);									//Install in L2 cache
+		delay+=dram_access(sys->dram,lineaddr,0);											//Calculate Delay
+		if((sys->l2cache->last_evicted_line.valid==TRUE)&&(sys->l2cache->last_evicted_line.dirty==TRUE))				//If lien is VALID and DIRTY
+		{
+			a+=dram_access(sys->dram,sys->l2cache->last_evicted_line.tag,1);							//Write to DRAM
+			sys->l2cache->last_evicted_line.valid=FALSE;										//Set to false
+		}
+	}
 
-  //To get the delay of L2 MISS, you must use the dram_access() function
-  //To perform writebacks to memory, you must use the dram_access() function
-  //This will help us track your memory reads and memory writes
-
-  return delay;
+	return delay;
 }
