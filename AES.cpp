@@ -1,9 +1,9 @@
 //============================================================================
 // Name        : AES.cpp
-// Author      : 
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Author      : Mathew Prabakar
+// Version     : 1.0
+// Copyright   : Keep your hands off my code
+// Description : AES C++
 //============================================================================
 
 #include <iostream>
