@@ -6,34 +6,30 @@
 
 typedef struct Core Core;
 
-
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
+struct Core 
+{
+	uns   core_id;
 
-struct Core {
-  uns   core_id;
-
-  Memsys *memsys;
+	Memsys *memsys;
     
-  char  trace_fname[1024];
-  FILE *trace;
+	char  trace_fname[1024];
+	FILE *trace;
     
-  uns   done;
+	uns   done;
 
-  uns64  trace_inst_addr;
-  uns64  trace_inst_type;
-  uns64  trace_ldst_addr;
+	uns64  trace_inst_addr;
+	uns64  trace_inst_type;
+	uns64  trace_ldst_addr;
   
-  uns64 snooze_end_cycle; // when waiting for data to return
+	uns64 snooze_end_cycle; // when waiting for data to return
 
-  uns64 inst_count;
-  uns64 done_inst_count;
-  uns64 done_cycle_count;
+	uns64 inst_count;
+	uns64 done_inst_count;
+	uns64 done_cycle_count;
 };
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
