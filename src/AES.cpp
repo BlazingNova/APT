@@ -16,7 +16,6 @@ using namespace std;
 class AES{
 
 private:
-//public:
 	uint8_t sbox [256]= {
 		    0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
 		    0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -51,9 +50,8 @@ private:
 		    0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68,
 		    0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 	};
-//private:
+	
 	uint8_t KEY[16];
-//public:
 	vector<uint32_t> Text;
 	vector<uint32_t> W;
 	vector<uint32_t> Result;
@@ -429,7 +427,7 @@ void PrintKey()
 			cout<<hex<<(int)KEY[i]<<" ";
 	}
 };
-
+/*
 int main() {
 
 	vector<uint32_t> Enc;
@@ -442,4 +440,4 @@ int main() {
 	obj.PrintResult();
 
 	return 0;
-}
+}*/
