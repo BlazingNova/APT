@@ -429,7 +429,7 @@ void PrintKey()
 			cout<<hex<<(int)KEY[i]<<" ";
 	}
 };
-
+/*
 int main() {
 
 	vector<uint32_t> Enc;
@@ -442,4 +442,4 @@ int main() {
 	obj.PrintResult();
 
 	return 0;
-}
+}*/
