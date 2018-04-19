@@ -15,8 +15,8 @@ using namespace std;
 
 class AES{
 
-//private:
-public:
+private:
+//public:
 	uint8_t sbox [256]= {
 		    0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
 		    0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -51,9 +51,9 @@ public:
 		    0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68,
 		    0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 	};
-private:
+//private:
 	uint8_t KEY[16];
-public:
+//public:
 	vector<uint32_t> Text;
 	vector<uint32_t> W;
 	vector<uint32_t> Result;
@@ -81,7 +81,7 @@ uint32_t modulo(uint32_t a)
 //		cout<<"MOD is     "<<bitset<32>(q<<abs(8-peak(temp)))<<"\n          ";
 		temp ^=(q<<abs(8-peak(temp)));
 	}
-	cout<<"BYE\n";
+	//cout<<"BYE\n";
 
 	return temp;
 }
@@ -245,20 +245,6 @@ uint32_t g(uint32_t a, int i)
 	return res ^ RC;
 }
 
-
-void SetKey(string str)
-{
-	char myarr[16]={NULL};
-	str.copy(myarr,16);
-	for(int i=0;i<16;i++)
-		KEY[i] = (int)myarr[i];
-
-	cout<<"\nKEY\n";
-	for(int i=0;i<16;i++)
-		cout<<hex<<(int)KEY[i]<<" ";
-	cout<<"\n";
-}
-
 void SetIP(string str)
 {
 	Text.clear();
@@ -365,6 +351,20 @@ void cypher(uint32_t in[4])
 	ShiftBytes(in,3,3);
 	AddRoundKey(in,40);
 }
+public:
+
+void SetKey(string str)
+{
+	char myarr[16]={NULL};
+	str.copy(myarr,16);
+	for(int i=0;i<16;i++)
+		KEY[i] = (int)myarr[i];
+
+	/*cout<<"\nKEY\n";
+	for(int i=0;i<16;i++)
+		cout<<hex<<(int)KEY[i]<<" ";
+	cout<<"\n";*/
+}
 
 vector<uint32_t> encrypt(string str)
 {
@@ -390,12 +390,12 @@ vector<uint32_t> encrypt(string str)
 		in[3]=Text[i*4+3];
 
 	cypher(in);
-
+/*
 	cout<<hex<<in[0]<<"\n";
 	cout<<hex<<in[1]<<"\n";
 	cout<<hex<<in[2]<<"\n";
 	cout<<hex<<in[3]<<"\n";
-
+*/
 	Result.push_back(in[0]);
 	Result.push_back(in[1]);
 	Result.push_back(in[2]);
@@ -429,7 +429,7 @@ void PrintKey()
 			cout<<hex<<(int)KEY[i]<<" ";
 	}
 };
-/*
+
 int main() {
 
 	vector<uint32_t> Enc;
@@ -442,4 +442,4 @@ int main() {
 	obj.PrintResult();
 
 	return 0;
-}*/
+}
