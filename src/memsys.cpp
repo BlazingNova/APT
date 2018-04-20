@@ -36,7 +36,7 @@ Memsys *memsys_new(void)
   if(SIM_MODE!=SIM_MODE_A){
     sys->icache = cache_new(ICACHE_SIZE, ICACHE_ASSOC, CACHE_LINESIZE, REPL_POLICY);
     sys->l2cache = cache_new(L2CACHE_SIZE, L2CACHE_ASSOC, CACHE_LINESIZE, REPL_POLICY);
-    //sys->dram    = dram_new();
+    sys->dram    = dram_new();
   }
 
   return sys;

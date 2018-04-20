@@ -1,14 +1,14 @@
 RM        := /bin/rm -rf
 SIM       := ./sim
-CC        := gcc
-CFLAGS    := -O2 -lm -std=gnu99 -W -Wall -Wno-unused-parameter
+CC        := g++
+CFLAGS    := -O2 -lm -std=c++0x -W -Wall -Wno-unused-parameter
 DFLAGS    := -pg -g
 PFLAGS    := -pg
 
 
 
 all: 
-	${CC} ${CFLAGS} core.c dram.c cache.c  sim.c memsys.c   -o ${SIM}
+	${CC} ${CFLAGS} core.cpp dram.cpp cache.cpp  sim.cpp memsys.cpp   -o ${SIM}
 
 
 clean: 

@@ -20,22 +20,22 @@
 
 
 extern MODE   SIM_MODE;
-extern uint64_t  CACHE_LINESIZE;
+extern uns64  CACHE_LINESIZE;
 
 
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 
-DRAM::DRAM(){
-  //DRAM *dram = (DRAM *) calloc (1, sizeof (DRAM));
+DRAM   *dram_new(){
+  DRAM *dram = (DRAM *) calloc (1, sizeof (DRAM));
   assert(DRAM_BANKS <= MAX_DRAM_BANKS);
-  //return dram;
+  return dram;
 }
 
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 
-void    DRAM::dram_print_stats(DRAM *dram){
+void    dram_print_stats(DRAM *dram){
   double rddelay_avg=0;
   double wrdelay_avg=0;
   char header[256];
@@ -60,9 +60,9 @@ void    DRAM::dram_print_stats(DRAM *dram){
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 
-uint64_t  DRAM:: dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write)
+uns64   dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write)
 {
-	uint64_t delay=DRAM_LATENCY_FIXED;
+	uns64 delay=DRAM_LATENCY_FIXED;
 
 	if(SIM_MODE!=SIM_MODE_B)
 	{
@@ -88,13 +88,13 @@ uint64_t  DRAM:: dram_access(DRAM *dram,Addr lineaddr, Flag is_dram_write)
 // Modify the function below only if you are attempting Part C 
 ///////////////////////////////////////////////////////////////////
 
-uint64_t  DRAM:: dram_access_sim_rowbuf(DRAM *dram,Addr lineaddr, Flag is_dram_write)
+uns64   dram_access_sim_rowbuf(DRAM *dram,Addr lineaddr, Flag is_dram_write)
 {
-	uint64_t delay=0;
+	uns64 delay=0;
 	
 	//BANK AND ROW CALCULATION STARTS HERE
-	uint64_t bankid=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))%DRAM_BANKS);						//Find the Bank ID
-	uint64_t rowinbank=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))/DRAM_BANKS);						//Find the Row ID
+	uns64 bankid=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))%DRAM_BANKS);						//Find the Bank ID
+	uns64 rowinbank=((lineaddr/(ROWBUF_SIZE/CACHE_LINESIZE))/DRAM_BANKS);						//Find the Row ID
 	//BANK AND ROW CALCULATION ENDS HERE
 	//
 	//DELAYU CALCULATION STARTS HERE
