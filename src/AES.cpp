@@ -2,7 +2,7 @@
 // Name        : AES.cpp
 // Author      : Mathew Prabakar
 // Version     : 1.0
-// Copyright   : Keep your hands off my code
+// Copyright   : Keep your hands off my code --No
 // Description : AES Encryption in C++
 //============================================================================
 
