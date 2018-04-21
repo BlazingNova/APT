@@ -5,6 +5,7 @@
 #include <time.h>
 #include "AES.cpp"
 #include "cache.h"
+#include <unordered_map>
 
 extern uns64 cycle; // You can use this as timestamp for LRU
 int trigger=0;
@@ -13,7 +14,7 @@ int init=1;
 AES obj;
 //obj.SetKey("The answer is 42");
 vector<uint32_t> encline;
-
+std::unordered_map<Addr,std::vector<uint32_t>> Table;
 ////////////////////////////////////////////////////////////////////
 // ------------- DO NOT MODIFY THE INIT FUNCTION -----------
 ////////////////////////////////////////////////////////////////////
@@ -80,7 +81,11 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 	char temp[256];
 	sprintf(temp,"%d",lineaddr);
 //	printf("\nSprinted : %s",temp);
+	if(Table.count(lineaddr)==0){		
 	encline=obj.encrypt(temp);						//Initialize outcome
+	Table[lineaddr]=encline;}
+	else
+		encline=Table[lineaddr];
 
 	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
 
