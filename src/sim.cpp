@@ -133,6 +133,10 @@ void print_dots(){
   }
 
   if (cycle % LINE_INTERVAL ==0){
+	if(cycle!=0)
+	{
+	//	print_stats();
+	}
 	printf("\n%4llu M\t", cycle/1000000);
 	fflush(stdout);
     }

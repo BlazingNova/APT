@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-
+#include "AES.cpp"
 #include "cache.h"
 
 extern uns64 cycle; // You can use this as timestamp for LRU
 int trigger=0;
+int init=1;
+
+AES obj;
+//obj.SetKey("The answer is 42");
+vector<uint32_t> encline;
 
 ////////////////////////////////////////////////////////////////////
 // ------------- DO NOT MODIFY THE INIT FUNCTION -----------
@@ -15,6 +20,11 @@ int trigger=0;
 
 Cache *cache_new(uns64 size, uns64 assoc, uns64 linesize, uns64 repl_policy)
 {
+	if(init==1)
+	{
+		obj.SetKey("fnoaenl");
+		init=0;
+	}
 	Cache *c = (Cache *) calloc (1, sizeof (Cache));
 	c->num_ways = assoc;
 	c->repl_policy = repl_policy;
@@ -26,6 +36,7 @@ Cache *cache_new(uns64 size, uns64 assoc, uns64 linesize, uns64 repl_policy)
 	// determine num sets, and init the cache
 	c->num_sets = size/(linesize*assoc);
 	c->sets  = (Cache_Set *) calloc (c->num_sets, sizeof(Cache_Set));
+	
 	return c;
 }
 
@@ -64,9 +75,22 @@ void cache_print_stats(Cache *c, char *header)
 
 Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 {
-	Flag outcome=MISS;							//Initialize outcome
-	int set_index=lineaddr%c->num_sets; 					//Get the index of the set to access
-	
+	uint64_t encline64;
+	Flag outcome=MISS;
+	char temp[256];
+	sprintf(temp,"%d",lineaddr);
+//	printf("\nSprinted : %s",temp);
+	encline=obj.encrypt(temp);						//Initialize outcome
+
+	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+
+
+	int set_index1=(lineaddr)%c->num_sets; 					//Get the index of the set to access
+	int set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to access
+	//int set_index=(int)encline[0]%c->num_sets; 				//Get the index of the set to access
+	//printf("\nSet index = %d",set_index);
+//	int set_index=1;	
+	//printf("\nLineaddr : %llu || Encrypted : %d || Set Index Enc: %d || Set Index : %d",lineaddr,(int)(encline[0]+encline[1]+encline[2]+encline[3]),set_index,set_index1);
 	//START OF ACCESS
 	for(int ii=0;ii<(int)c->num_ways;ii++)
 	{
@@ -100,7 +124,7 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 		}
 	}
 	//END OF STATS UPDATE
-	
+
 	return outcome;
 }
 
@@ -112,8 +136,21 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 
 void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 {
+	uint64_t encline64;
+	Flag outcome=MISS;
+	char temp[256];
+	sprintf(temp,"%d",lineaddr);
+//	printf("\nSprinted : %s",temp);
+	encline=obj.encrypt(temp);						//Initialize outcome
+
+	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+
+
+	int set_index1=(lineaddr)%c->num_sets; 					//Get the index of the set to access
+	int set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to access
+
 	uns victim=-1,start=-1;
-	int set_index=lineaddr%c->num_sets;
+	//int set_index=lineaddr%c->num_sets;
 	
 	//START OF SEARCH FOR INSTALL LOCATION
 	for(int ii=0;ii<(int)c->num_ways;ii++)					//Check all ways for the cache
