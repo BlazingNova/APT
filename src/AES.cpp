@@ -2,7 +2,7 @@
 // Name        : AES.cpp
 // Author      : Mathew Prabakar
 // Version     : 1.0
-// Copyright   : Keep your hands off my code --No
+// Copyright   : Keep your hands off my code
 // Description : AES Encryption in C++
 //============================================================================
 
@@ -247,7 +247,7 @@ void SetIP(string str)
 {
 	Text.clear();
 
-	char myarr[str.length()+1]={NULL};
+	char *myarr=new char[str.length()+1];
 	str.copy(myarr,str.length());
 	uint8_t t[4];
 
@@ -267,6 +267,8 @@ void SetIP(string str)
 
 	for(int i=0;i<Text.size()%4;i++)
 		Text.push_back(0x00000000);
+
+	delete myarr;
 }
 
 
@@ -358,6 +360,7 @@ void SetKey(string str)
 	for(int i=0;i<16;i++)
 		KEY[i] = (int)myarr[i];
 
+	keyexpansion();
 	/*cout<<"\nKEY\n";
 	for(int i=0;i<16;i++)
 		cout<<hex<<(int)KEY[i]<<" ";
@@ -368,17 +371,17 @@ vector<uint32_t> encrypt(string str)
 {
 	SetIP(str);
 	Result.clear();
-	cout<<"\nText\n";
+	//cout<<"\nText\n";
 
-	for(int i=0;i<Text.size();i++){
+/*	for(int i=0;i<Text.size();i++){
 		cout<<hex<<Text[i]<<"\n";
 	if(i%4==3)
 		cout<<"-------------\n";
 	}
-
+*/
 
 	uint32_t in[4];
-	keyexpansion();
+
 //	cout<<Text.size()/4<<"\n";
 	for(int i=0;i<Text.size()/4;i++)
 	{
