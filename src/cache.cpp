@@ -11,6 +11,8 @@ extern uns64 cycle; // You can use this as timestamp for LRU
 int trigger=0;
 int init=1;
 
+extern uns64 ENC_POLICY;
+
 AES obj;
 //obj.SetKey("The answer is 42");
 vector<uint32_t> encline;
@@ -78,20 +80,31 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 {
 	uint64_t encline64;
 	Flag outcome=MISS;
-	char temp[256];
-	sprintf(temp,"%d",lineaddr);
-//	printf("\nSprinted : %s",temp);
-	if(Table.count(lineaddr)==0){		
-	encline=obj.encrypt(temp);						//Initialize outcome
-	Table[lineaddr]=encline;}
-	else
-		encline=Table[lineaddr];
+	int set_index;
+	if(ENC_POLICY==1)
+	{
+//		printf("Using encrypted policy");
+		char temp[256];
+		sprintf(temp,"%d",lineaddr);
+	//	printf("\nSprinted : %s",temp);
+		if(Table.count(lineaddr)==0)
+		{		
+			encline=obj.encrypt(temp);						//Initialize outcome
+			Table[lineaddr]=encline;
+		}
+		else
+		{
+			encline=Table[lineaddr];
+		}
+		encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp
+	}
 
-	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
-
-
-	int set_index1=(lineaddr)%c->num_sets; 					//Get the index of the set to access
-	int set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to access
+	if(ENC_POLICY==0)
+	{
+//		printf("\nStandard policy");
+		set_index=(lineaddr)%c->num_sets; 					//Get the index of the set to access
+	}
 	//int set_index=(int)encline[0]%c->num_sets; 				//Get the index of the set to access
 	//printf("\nSet index = %d",set_index);
 //	int set_index=1;	
@@ -143,16 +156,42 @@ void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 {
 	uint64_t encline64;
 	Flag outcome=MISS;
-	char temp[256];
-	sprintf(temp,"%d",lineaddr);
+	int set_index;
+	if(ENC_POLICY==1)
+	{
+//		printf("Using encrypted policy");
+		char temp[256];
+		sprintf(temp,"%d",lineaddr);
+	//	printf("\nSprinted : %s",temp);
+		if(Table.count(lineaddr)==0)
+		{		
+			encline=obj.encrypt(temp);						//Initialize outcome
+			Table[lineaddr]=encline;
+		}
+		else
+		{
+			encline=Table[lineaddr];
+		}
+		encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp
+	}
+
+	if(ENC_POLICY==0)
+	{
+//		printf("\nStandard policy");
+		set_index=(lineaddr)%c->num_sets; 					//Get the index of the set to access
+	}
+
+//	char temp[256];
+//	sprintf(temp,"%d",lineaddr);
 //	printf("\nSprinted : %s",temp);
-	encline=obj.encrypt(temp);						//Initialize outcome
+//	encline=obj.encrypt(temp);						//Initialize outcome
 
-	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+//	encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
 
 
-	int set_index1=(lineaddr)%c->num_sets; 					//Get the index of the set to access
-	int set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to access
+//	int set_index1=(lineaddr)%c->num_sets; 					//Get the index of the set to access
+//	int set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to access
 
 	uns victim=-1,start=-1;
 	//int set_index=lineaddr%c->num_sets;
