@@ -85,7 +85,7 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 	{
 //		printf("Using encrypted policy");
 		char temp[256];
-		sprintf(temp,"%d",lineaddr);
+		sprintf(temp,"%llu",lineaddr);
 	//	printf("\nSprinted : %s",temp);
 		if(Table.count(lineaddr)==0)
 		{		
@@ -96,7 +96,7 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 		{
 			encline=Table[lineaddr];
 		}
-		encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+		encline64=(int)(encline[0])+(int)(encline[1]<<31)+(int)(encline[2]<<31)+(int)encline[3];
 		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp
 	}
 
@@ -161,7 +161,7 @@ void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 	{
 //		printf("Using encrypted policy");
 		char temp[256];
-		sprintf(temp,"%d",lineaddr);
+		sprintf(temp,"%llu",lineaddr);
 	//	printf("\nSprinted : %s",temp);
 		if(Table.count(lineaddr)==0)
 		{		
@@ -172,7 +172,7 @@ void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 		{
 			encline=Table[lineaddr];
 		}
-		encline64=(int)(encline[0])+(int)(encline[1]<<32)+(int)(encline[2]<<32)+(int)encline[3];
+		encline64=(int)(encline[0])+(int)(encline[1]<<31)+(int)(encline[2]<<31)+(int)encline[3];
 		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp
 	}
 
