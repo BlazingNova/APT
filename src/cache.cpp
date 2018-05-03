@@ -12,6 +12,8 @@ int trigger=0;
 int init=1;
 
 extern uns64 ENC_POLICY;
+extern uns64 ENC_DELAY_ENABLE;
+extern uns64 AES_TABLE_HIT;
 
 AES obj;
 //obj.SetKey("The answer is 42");
@@ -91,10 +93,12 @@ Flag cache_access(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 		{		
 			encline=obj.encrypt(temp);						//Initialize outcome
 			Table[lineaddr]=encline;
+			AES_TABLE_HIT = 0;
 		}
 		else
 		{
 			encline=Table[lineaddr];
+			AES_TABLE_HIT = 1;
 		}
 		encline64=(int)(encline[0])+(int)(encline[1]<<31)+(int)(encline[2]<<31)+(int)encline[3];
 		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp
@@ -167,10 +171,12 @@ void cache_install(Cache *c, Addr lineaddr, uns is_write, uns core_id)
 		{		
 			encline=obj.encrypt(temp);						//Initialize outcome
 			Table[lineaddr]=encline;
+			AES_TABLE_HIT = 0;
 		}
 		else
 		{
 			encline=Table[lineaddr];
+			AES_TABLE_HIT = 1;
 		}
 		encline64=(int)(encline[0])+(int)(encline[1]<<31)+(int)(encline[2]<<31)+(int)encline[3];
 		set_index=(lineaddr^(int)encline64)%c->num_sets; 					//Get the index of the set to accessp

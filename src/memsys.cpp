@@ -22,6 +22,12 @@ extern uns64  ICACHE_SIZE;
 extern uns64  ICACHE_ASSOC; 
 extern uns64  L2CACHE_SIZE; 
 extern uns64  L2CACHE_ASSOC; 
+extern uns64  AES_TABLE_HIT;
+extern uns64  ENC_POLICY;
+extern uns64  ENC_DELAY_ENABLE;
+
+#define ENC_LUT_HIT_LATENCY 1
+#define ENC_LUT_MISS_LATENCY 2
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
@@ -192,21 +198,40 @@ uns64 memsys_access_modeBC(Memsys *sys, Addr lineaddr, Access_Type type,uns core
 	if(!needs_dcache_access)														//If L1 ICACHE
 	{
 		Flag outcome=cache_access(sys->icache,lineaddr,is_write,core_id);								
-		delay+=ICACHE_HIT_LATENCY;													//Get the delay for Icache access
+		delay+=ICACHE_HIT_LATENCY;
 		if(outcome==MISS)														//if MISS
 		{
 			cache_install(sys->icache,lineaddr,is_write,core_id);									//Install in icache
 			delay+=memsys_L2_access(sys,lineaddr,0,core_id);									//Go to L2 for line
+			/*if(AES_TABLE_HIT == 0){
+				delay += ENC_LUT_MISS_LATENCY;
+			}
+			else{
+				delay += ENC_LUT_HIT_LATENCY;
+			}*/
 		}
 	}
 	else																	//If L1 DCACHE
 	{
 		Flag outcome=cache_access(sys->dcache, lineaddr, is_write,core_id);
 		delay+=DCACHE_HIT_LATENCY;													//Get the delay for Dcache access
+		//printf("\n%d\n", AES_TABLE_HIT);
+		/*if(AES_TABLE_HIT == 0){
+			delay += ENC_LUT_MISS_LATENCY;
+		}
+		else{
+			delay += ENC_LUT_HIT_LATENCY;
+		}*/
 		if(outcome==MISS)														//If MISS
 		{
 			cache_install(sys->dcache, lineaddr, is_write,core_id);									//Install in Dcache
 			delay+=memsys_L2_access(sys,lineaddr,FALSE,core_id);									//Add the delay for L2
+			/*if(AES_TABLE_HIT == 0){
+				delay += ENC_LUT_MISS_LATENCY;
+			}
+			else{
+				delay += ENC_LUT_HIT_LATENCY;
+			}*/
 			if((sys->dcache->last_evicted_line.valid==TRUE)&&(sys->dcache->last_evicted_line.dirty==TRUE))				//If line is VALID and DIRTY
 			{
 				a+=memsys_L2_access(sys,sys->dcache->last_evicted_line.tag,TRUE,sys->dcache->last_evicted_line.core_id);	//Do the L2 access function -> insert and check DRAM
@@ -228,9 +253,25 @@ uns64   memsys_L2_access(Memsys *sys, Addr lineaddr, Flag is_writeback, uns core
 {
 	uns64 delay = L2CACHE_HIT_LATENCY,a=0;
 	Flag outcome=cache_access(sys->l2cache,lineaddr,is_writeback,core_id);									//Access the L2 cache
+	if(ENC_POLICY == 1 && ENC_DELAY_ENABLE == 1){
+		if(AES_TABLE_HIT == 0){
+			delay += ENC_LUT_MISS_LATENCY;
+		}
+		else{
+			delay += ENC_LUT_HIT_LATENCY;									//Install in L2 cache
+		}
+	}
 	if(outcome==MISS)															//If Cache miss
 	{
-		cache_install(sys->l2cache,lineaddr,is_writeback,core_id);									//Install in L2 cache
+		cache_install(sys->l2cache,lineaddr,is_writeback,core_id);
+		if(ENC_POLICY == 1 && ENC_DELAY_ENABLE == 1){
+			if(AES_TABLE_HIT == 0){
+				delay += ENC_LUT_MISS_LATENCY;
+			}
+			else{
+				delay += ENC_LUT_HIT_LATENCY;									//Install in L2 cache
+			}
+		}
 		delay+=dram_access(sys->dram,lineaddr,0);											//Calculate Delay
 		if((sys->l2cache->last_evicted_line.valid==TRUE)&&(sys->l2cache->last_evicted_line.dirty==TRUE))				//If lien is VALID and DIRTY
 		{

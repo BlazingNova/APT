@@ -35,6 +35,10 @@ uns64       NUM_CORES       = 1;
 
 uns64	    ENC_POLICY	    = 0;
 
+uns64	    ENC_DELAY_ENABLE= 0;
+
+uns64		AES_TABLE_HIT = 0; 
+
 /***************************************************************************************
  * Functions
  ***************************************************************************************/
@@ -163,7 +167,8 @@ void die_usage() {
     printf("      -Dassoc          <num>    Set associativity of the the Level 1 DCACHE (Default:8)\n");
     printf("      -L2sizeKB        <num>    Set capacity in KB of the unified Level 2 cache (Default: 512 KB)\n");
     printf("      -L2repl          <num>    Set replacement policy for L2 cache [0:LRU,1:RND,2:SWP] (Default:0)\n");
-    printf("	  -enc		   <num>    Set the Encryption policy [0:Diabled,1:Enabled] (Default:0)\n");
+    printf("	  -enc		   	   <num>    Set the Encryption policy [0:Diabled,1:Enabled] (Default:0)\n");
+    printf("	  -enc_delay	   <num>    Enable the Encryption delay modeling [0:Diabled,1:Enabled] (Default:0)\n");
     printf("      -SWP_core0ways   <num>    Set static quota for core_0 for SWP (Default:1)\n");
     exit(0);
 }
@@ -223,6 +228,13 @@ void get_params(int argc, char** argv){
 	    else if (!strcmp(argv[ii], "-enc")) {
 		if (ii < argc - 1) {
 		    ENC_POLICY = atoi(argv[ii+1]);
+		    ii += 1;
+		}
+	    }
+
+	    else if (!strcmp(argv[ii], "-enc_delay")) {
+		if (ii < argc - 1) {
+		    ENC_DELAY_ENABLE = atoi(argv[ii+1]);
 		    ii += 1;
 		}
 	    }
